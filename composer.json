@@ -1,0 +1,28 @@
+{
+    "name": "digit-soft/re-action-clients-pool",
+    "version": "0.1.0",
+    "description": "Clients pool for Re-action framework",
+    "keywords": ["digit-soft", "reactphp", "re-action", "re-action pool"],
+    "license": "MIT",
+    "support": {
+        "issues": "https://github.com/digit-soft/re-action-clients-pool/issues",
+        "source": "https://github.com/digit-soft/re-action-clients-pool"
+    },
+    "authors": [
+        {
+            "name": "Digit",
+            "email": "digit.vova@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "php": ">=7.0.0",
+        "react/promise": "~2"
+    },
+    "require-dev": {},
+    "autoload": {
+        "psr-4": {
+            "Reaction\\ClientsPool\\": "src/"
+        }
+    }
+}
