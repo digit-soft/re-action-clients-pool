@@ -12,26 +12,26 @@ interface PoolInterface extends EventEmitterInterface
 {
     /**
      * Get client from pool
-     * @return ClientInterface
+     * @return PoolClientInterface
      */
     public function getClient();
 
     /**
      * Get client with empty queue (in ready state)
-     * @return ClientInterface|null
+     * @return PoolClientInterface|null
      */
     public function getClientIdle();
 
     /**
      * Get least busy client
-     * @return ClientInterface|null
+     * @return PoolClientInterface|null
      */
     public function getClientLeastBusy();
 
     /**
      * Create client
      * @param bool $addToPool
-     * @return ClientInterface
+     * @return PoolClientInterface
      */
     public function createClient($addToPool = true);
 

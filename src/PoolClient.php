@@ -9,7 +9,7 @@ use Reaction\Base\Component;
  * Just an example class, use your own with `PoolClientTrait` instead.
  * @package Reaction\ClientsPool
  */
-class PoolClient extends Component implements ClientInterface
+class PoolClient extends Component implements PoolClientInterface
 {
     use PoolClientTrait;
 }

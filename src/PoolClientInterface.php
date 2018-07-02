@@ -10,7 +10,7 @@ use Evenement\EventEmitterInterface;
  *
  * @property integer $createdAt
  */
-interface ClientInterface extends EventEmitterInterface
+interface PoolClientInterface extends EventEmitterInterface
 {
     const CLIENT_POOL_EVENT_CLOSE = 'client_close';
     const CLIENT_POOL_EVENT_CHANGE_STATE = 'change_state';

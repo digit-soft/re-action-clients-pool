@@ -35,7 +35,7 @@ class Pool extends Component implements PoolInterface
     public $loop;
 
     /**
-     * @var ClientInterface[] Clients pool
+     * @var PoolClientInterface[] Clients pool
      */
     protected $_clients = [];
     /**
@@ -62,7 +62,7 @@ class Pool extends Component implements PoolInterface
 
     /**
      * Get client from pool
-     * @return ClientInterface
+     * @return PoolClientInterface
      */
     public function getClient()
     {
@@ -78,7 +78,7 @@ class Pool extends Component implements PoolInterface
 
     /**
      * Get client with empty queue
-     * @return ClientInterface|null
+     * @return PoolClientInterface|null
      */
     public function getClientIdle()
     {
@@ -86,7 +86,7 @@ class Pool extends Component implements PoolInterface
             $states = $this->_clientsStates;
             asort($states);
             foreach ($states as $clientId => $state) {
-                if ($state === ClientInterface::CLIENT_POOL_STATE_READY && isset($this->_clients[$clientId])) {
+                if ($state === PoolClientInterface::CLIENT_POOL_STATE_READY && isset($this->_clients[$clientId])) {
                     return $this->_clients[$clientId];
                 }
             }
@@ -96,7 +96,7 @@ class Pool extends Component implements PoolInterface
 
     /**
      * Get least busy client
-     * @return ClientInterface|null
+     * @return PoolClientInterface|null
      */
     public function getClientLeastBusy()
     {
@@ -116,12 +116,12 @@ class Pool extends Component implements PoolInterface
     /**
      * Create client
      * @param bool  $addToPool
-     * @return ClientInterface
+     * @return PoolClientInterface
      */
     public function createClient($addToPool = true)
     {
         $config = $this->clientConfig;
-        /** @var ClientInterface $client */
+        /** @var PoolClientInterface $client */
         if (is_array($config) && ArrayHelper::isIndexed($config)) {
             $client = \Reaction::create(...$config);
         } else {
@@ -158,28 +158,28 @@ class Pool extends Component implements PoolInterface
 
     /**
      * Bind event handlers to client instance
-     * @param ClientInterface $client
+     * @param PoolClientInterface $client
      */
-    protected function bindClientEvents(ClientInterface $client)
+    protected function bindClientEvents(PoolClientInterface $client)
     {
         $clientId = $client->getClientId();
-        $this->_clientsStates[$clientId] = ClientInterface::CLIENT_POOL_STATE_READY;
+        $this->_clientsStates[$clientId] = PoolClientInterface::CLIENT_POOL_STATE_READY;
         $this->_clientsQueueCounters[$clientId] = 0;
 
         //Remove client from pool on close
-        $client->once(ClientInterface::CLIENT_POOL_EVENT_CLOSE, function() use ($client, $clientId) {
+        $client->once(PoolClientInterface::CLIENT_POOL_EVENT_CLOSE, function() use ($client, $clientId) {
             unset($this->_clients[$clientId]);
             unset($this->_clientsStates[$clientId]);
             unset($this->_clientsQueueCounters[$clientId]);
-            $client->removeAllListeners(ClientInterface::CLIENT_POOL_EVENT_CHANGE_STATE);
-            $client->removeAllListeners(ClientInterface::CLIENT_POOL_EVENT_CHANGE_QUEUE);
+            $client->removeAllListeners(PoolClientInterface::CLIENT_POOL_EVENT_CHANGE_STATE);
+            $client->removeAllListeners(PoolClientInterface::CLIENT_POOL_EVENT_CHANGE_QUEUE);
         });
         //Change client state
-        $client->on(ClientInterface::CLIENT_POOL_EVENT_CHANGE_STATE, function($state) use ($client, $clientId) {
+        $client->on(PoolClientInterface::CLIENT_POOL_EVENT_CHANGE_STATE, function($state) use ($client, $clientId) {
             $this->_clientsStates[$clientId] = $state;
         });
         //Change client queue count
-        $client->on(ClientInterface::CLIENT_POOL_EVENT_CHANGE_QUEUE, function($queueCount) use ($client, $clientId) {
+        $client->on(PoolClientInterface::CLIENT_POOL_EVENT_CHANGE_QUEUE, function($queueCount) use ($client, $clientId) {
             $this->_clientsQueueCounters[$clientId] = $queueCount;
         });
     }

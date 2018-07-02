@@ -13,7 +13,7 @@ trait PoolClientTrait
     /** @var string|null */
     protected $_poolClientId;
     /** @var int */
-    protected $_poolClientState = ClientInterface::CLIENT_POOL_STATE_READY;
+    protected $_poolClientState = PoolClientInterface::CLIENT_POOL_STATE_READY;
     /** @var int */
     protected $_poolClientQueueCounter = 0;
 
@@ -58,7 +58,7 @@ trait PoolClientTrait
      */
     public function clientClose()
     {
-        $this->emit(ClientInterface::CLIENT_POOL_EVENT_CLOSE);
+        $this->emit(PoolClientInterface::CLIENT_POOL_EVENT_CLOSE);
     }
 
     /**
@@ -68,7 +68,7 @@ trait PoolClientTrait
     protected function changeState($state)
     {
         $this->_poolClientState = $state;
-        $this->emit(ClientInterface::CLIENT_POOL_EVENT_CHANGE_STATE, [$state]);
+        $this->emit(PoolClientInterface::CLIENT_POOL_EVENT_CHANGE_STATE, [$state]);
     }
 
     /**
@@ -82,10 +82,10 @@ trait PoolClientTrait
         }
         $this->_poolClientQueueCounter = $queueCounter;
         //Automatically change client state to `ClientInterface::CLIENT_POOL_STATE_READY` on empty queue
-        if ($this->_poolClientQueueCounter === 0 && $this->_poolClientState === ClientInterface::CLIENT_POOL_STATE_BUSY) {
-            $this->changeState(ClientInterface::CLIENT_POOL_STATE_READY);
+        if ($this->_poolClientQueueCounter === 0 && $this->_poolClientState === PoolClientInterface::CLIENT_POOL_STATE_BUSY) {
+            $this->changeState(PoolClientInterface::CLIENT_POOL_STATE_READY);
         }
-        $this->emit(ClientInterface::CLIENT_POOL_EVENT_CHANGE_QUEUE, [$queueCounter]);
+        $this->emit(PoolClientInterface::CLIENT_POOL_EVENT_CHANGE_QUEUE, [$queueCounter]);
     }
 
     /**
