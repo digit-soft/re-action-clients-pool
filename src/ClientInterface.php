@@ -12,7 +12,7 @@ use Evenement\EventEmitterInterface;
  */
 interface ClientInterface extends EventEmitterInterface
 {
-    const CLIENT_POOL_EVENT_CLOSE = 'close';
+    const CLIENT_POOL_EVENT_CLOSE = 'client_close';
     const CLIENT_POOL_EVENT_CHANGE_STATE = 'change_state';
     const CLIENT_POOL_EVENT_CHANGE_QUEUE = 'change_queue';
 
