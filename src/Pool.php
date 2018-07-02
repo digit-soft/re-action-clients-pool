@@ -26,11 +26,11 @@ class Pool extends Component implements PoolInterface
      */
     public $maxQueueCount = null;
     /**
-     * @var array Client config array used to create clients
+     * @var array|\Closure Client config array used to create clients
      */
     public $clientConfig = [];
     /**
-     * @var LoopInterface
+     * @var LoopInterface Event loop used
      */
     public $loop;
 
@@ -122,7 +122,9 @@ class Pool extends Component implements PoolInterface
     {
         $config = $this->clientConfig;
         /** @var PoolClientInterface $client */
-        if (is_array($config) && ArrayHelper::isIndexed($config)) {
+        if (!is_array($config) && $config instanceof \Closure) {
+            $client = $config();
+        } elseif (is_array($config) && ArrayHelper::isIndexed($config)) {
             $client = \Reaction::create(...$config);
         } else {
             $client = \Reaction::create($config);
