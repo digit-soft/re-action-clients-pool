@@ -27,4 +27,22 @@ interface PoolInterface extends EventEmitterInterface
      * @return ClientInterface|null
      */
     public function getClientLeastBusy();
+
+    /**
+     * Create client
+     * @param bool $addToPool
+     * @return ClientInterface
+     */
+    public function createClient($addToPool = true);
+
+    /**
+     * Check that clients max count reached
+     * @return bool
+     */
+    public function isReachedMaxClients();
+
+    /**
+     * Close all clients/connections
+     */
+    public function closeAll();
 }

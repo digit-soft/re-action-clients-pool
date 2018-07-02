@@ -18,7 +18,8 @@ interface ClientInterface extends EventEmitterInterface
 
     const CLIENT_POOL_STATE_READY = 0;
     const CLIENT_POOL_STATE_BUSY = 1;
-    const CLIENT_POOL_STATE_CLOSING = 2;
+    const CLIENT_POOL_STATE_NOT_READY = 2;
+    const CLIENT_POOL_STATE_CLOSING = 3;
 
     /**
      * Get client unique ID

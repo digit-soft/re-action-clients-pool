@@ -8,6 +8,8 @@ namespace Reaction\ClientsPool;
  */
 trait PoolClientTrait
 {
+    public $createdAt = 0;
+
     /** @var string|null */
     protected $_poolClientId;
     /** @var int */
@@ -28,7 +30,7 @@ trait PoolClientTrait
             } else {
                 $rand = $this->randomStr();
             }
-            return $now . $rand;
+            $this->_poolClientId = $now . $rand;
         }
         return $this->_poolClientId;
     }
@@ -83,6 +85,7 @@ trait PoolClientTrait
         if ($this->_poolClientQueueCounter === 0 && $this->_poolClientState === ClientInterface::CLIENT_POOL_STATE_BUSY) {
             $this->changeState(ClientInterface::CLIENT_POOL_STATE_READY);
         }
+        $this->emit(ClientInterface::CLIENT_POOL_EVENT_CHANGE_QUEUE, [$queueCounter]);
     }
 
     /**

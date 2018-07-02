@@ -5,6 +5,7 @@ namespace Reaction\ClientsPool;
 use React\EventLoop\LoopInterface;
 use React\EventLoop\Timer\TimerInterface;
 use Reaction\Base\Component;
+use Reaction\Helpers\ArrayHelper;
 
 /**
  * Class Pool
@@ -19,7 +20,7 @@ class Pool extends Component implements PoolInterface
     /**
      * @var int Maximum clients count
      */
-    public $maxCount = 10;
+    public $maxCount = 30;
     /**
      * @var int|null Maximum client queue count
      */
@@ -50,6 +51,9 @@ class Pool extends Component implements PoolInterface
      */
     protected $_clientsCleanupTimer;
 
+    /**
+     * @inheritdoc
+     */
     public function init()
     {
         parent::init();
@@ -64,6 +68,8 @@ class Pool extends Component implements PoolInterface
     {
         if (($client = $this->getClientIdle()) !== null) {
             return $client;
+        } elseif ($this->maxCount > count($this->_clients)) {
+            return $this->createClient();
         } elseif (($client = $this->getClientLeastBusy()) !== null) {
             return $client;
         }
@@ -79,9 +85,10 @@ class Pool extends Component implements PoolInterface
         if (!empty($this->_clientsStates)) {
             $states = $this->_clientsStates;
             asort($states);
-            if (reset($states) === ClientInterface::CLIENT_POOL_STATE_READY) {
-                $clientId = key($states);
-                return isset($this->_clients[$clientId]) ? $this->_clients[$clientId] : null;
+            foreach ($states as $clientId => $state) {
+                if ($state === ClientInterface::CLIENT_POOL_STATE_READY && isset($this->_clients[$clientId])) {
+                    return $this->_clients[$clientId];
+                }
             }
         }
         return null;
@@ -107,24 +114,20 @@ class Pool extends Component implements PoolInterface
     }
 
     /**
-     * Check that clients max count reached
-     * @return bool
-     */
-    protected function isReachedMaxClients()
-    {
-        return isset($this->maxCount) && $this->maxCount <= count($this->_clients);
-    }
-
-    /**
      * Create client
-     * @param bool $addToPool
+     * @param bool  $addToPool
      * @return ClientInterface
      */
-    protected function createClient($addToPool = true)
+    public function createClient($addToPool = true)
     {
         $config = $this->clientConfig;
         /** @var ClientInterface $client */
-        $client = \Reaction::create($config);
+        if (is_array($config) && ArrayHelper::isIndexed($config)) {
+            $client = \Reaction::create(...$config);
+        } else {
+            $client = \Reaction::create($config);
+        }
+        $client->createdAt = time();
         if ($addToPool) {
             $clientId = $client->getClientId();
             $this->_clients[$clientId] = $client;
@@ -132,6 +135,25 @@ class Pool extends Component implements PoolInterface
             $this->bindClientEvents($client);
         }
         return $client;
+    }
+
+    /**
+     * Check that clients max count reached
+     * @return bool
+     */
+    public function isReachedMaxClients()
+    {
+        return isset($this->maxCount) && $this->maxCount <= count($this->_clients);
+    }
+
+    /**
+     * Close all clients/connections
+     */
+    public function closeAll()
+    {
+        foreach ($this->_clients as $client) {
+            $client->clientClose();
+        }
     }
 
     /**
