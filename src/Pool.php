@@ -121,9 +121,12 @@ class Pool extends Component implements PoolInterface
     public function createClient($addToPool = true)
     {
         $config = $this->clientConfig;
-        /** @var PoolClientInterface $client */
         if (!is_array($config) && $config instanceof \Closure) {
-            $client = $config();
+            $config = $config();
+        }
+        /** @var PoolClientInterface $client */
+        if (!is_array($config) && $config instanceof PoolClientInterface) {
+            $client = $config;
         } elseif (is_array($config) && ArrayHelper::isIndexed($config)) {
             $client = \Reaction::create(...$config);
         } else {

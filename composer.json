@@ -1,6 +1,6 @@
 {
     "name": "digit-soft/re-action-clients-pool",
-    "version": "0.2.1",
+    "version": "0.2.2",
     "description": "Clients pool for Re-action framework",
     "keywords": ["digit-soft", "reactphp", "re-action", "re-action pool"],
     "license": "MIT",
