@@ -86,7 +86,7 @@ class Pool extends Component implements PoolInterface
             $states = $this->_clientsStates;
             asort($states);
             foreach ($states as $clientId => $state) {
-                if ($state === PoolClientInterface::CLIENT_POOL_STATE_READY && isset($this->_clients[$clientId])) {
+                if ($state === PoolClientInterface::CLIENT_POOL_STATE_READY && $this->clientExists($clientId)) {
                     return $this->_clients[$clientId];
                 }
             }
@@ -100,8 +100,12 @@ class Pool extends Component implements PoolInterface
      */
     public function getClientLeastBusy()
     {
-        if (!empty($this->_clientsQueueCounters)) {
-            $counters = $this->_clientsQueueCounters;
+        $counters = !empty($this->_clientsQueueCounters)
+            ? array_filter($this->_clientsQueueCounters, function($value, $key) {
+                return $this->getClientState($key) <= PoolClientInterface::CLIENT_POOL_STATE_BUSY;
+            }, ARRAY_FILTER_USE_BOTH)
+            : $this->_clientsQueueCounters;
+        if (!empty($counters)) {
             asort($counters);
             $minCounter = reset($counters);
             if (isset($this->maxQueueCount) && $minCounter >= $this->maxQueueCount && !$this->isReachedMaxClients()) {
@@ -134,6 +138,7 @@ class Pool extends Component implements PoolInterface
         }
         $client->createdAt = time();
         if ($addToPool) {
+            $client->pool = $this;
             $clientId = $client->getClientId();
             $this->_clients[$clientId] = $client;
             //Bind event handlers to client
@@ -152,6 +157,16 @@ class Pool extends Component implements PoolInterface
     }
 
     /**
+     * Check that client with given ID exists in pool
+     * @param string $id
+     * @return bool
+     */
+    public function clientExists($id)
+    {
+        return isset($this->_clients[$id]);
+    }
+
+    /**
      * Close all clients/connections
      */
     public function closeAll()
@@ -159,6 +174,16 @@ class Pool extends Component implements PoolInterface
         foreach ($this->_clients as $client) {
             $client->clientClose();
         }
+    }
+
+    /**
+     * Get client state
+     * @param string $id
+     * @return null|string
+     */
+    protected function getClientState($id)
+    {
+        return $this->clientExists($id) ? $this->_clientsStates[$id] : null;
     }
 
     /**
@@ -197,7 +222,7 @@ class Pool extends Component implements PoolInterface
         if (!isset($this->clientTtl)) {
             return;
         }
-        $this->_clientsCleanupTimer = $this->loop->addPeriodicTimer(1, function($timer) {
+        $this->_clientsCleanupTimer = $this->loop->addPeriodicTimer(3, function($timer) {
             $expireTime = time() - $this->clientTtl;
             foreach ($this->_clients as $client) {
                 if ($client->createdAt < $expireTime) {

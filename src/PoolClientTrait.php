@@ -25,8 +25,6 @@ trait PoolClientTrait
     protected $_poolClientStatePrev;
     /** @var int Queue counter */
     protected $_poolClientQueueCounter = 0;
-    /** @var string Client ID prefix */
-    protected $_clientIdPrefix = '';
 
     /**
      * Get client unique ID
@@ -35,8 +33,8 @@ trait PoolClientTrait
     public function getClientId()
     {
         if (!isset($this->_poolClientId)) {
-            while (!isset($id) || $this->pool->clientExists($id)) {
-                $id = $this->generatePoolClientId();
+            while (!isset($id) || !$this->isPoolClientIdUnique($id)) {
+                $id = static::generatePoolClientId();
             }
             $this->_poolClientId = $id;
         }
@@ -122,6 +120,8 @@ trait PoolClientTrait
         //Automatically change client state to `ClientInterface::CLIENT_POOL_STATE_READY` on empty queue
         if ($this->_poolClientQueueCounter === 0 && $this->_poolClientState === PoolClientInterface::CLIENT_POOL_STATE_BUSY) {
             $this->changeState(PoolClientInterface::CLIENT_POOL_STATE_READY);
+        } elseif ($this->_poolClientQueueCounter > 0 && $this->_poolClientState === PoolClientInterface::CLIENT_POOL_STATE_READY) {
+            $this->changeState(PoolClientInterface::CLIENT_POOL_STATE_BUSY);
         }
         $this->emit(PoolClientInterface::CLIENT_POOL_EVENT_CHANGE_QUEUE, [$queueCounter]);
     }
@@ -145,6 +145,15 @@ trait PoolClientTrait
     }
 
     /**
+     * Get pool client ID prefix
+     * @return string
+     */
+    protected static function getClientIdPrefix()
+    {
+        return '';
+    }
+
+    /**
      * Generate a random string, using a cryptographically secure
      * pseudo random number generator (random_int)
      * Used only if no Reaction class found
@@ -154,7 +163,7 @@ trait PoolClientTrait
      * @return string
      * @throws \Exception
      */
-    private function randomStr($length = 8, $keySpace = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ')
+    private static function randomStr($length = 8, $keySpace = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ')
     {
         $pieces = [];
         $max = mb_strlen($keySpace, '8bit') - 1;
@@ -165,18 +174,27 @@ trait PoolClientTrait
     }
 
     /**
+     * Check that pool client ID is unique
+     * @param string $id
+     * @return bool
+     */
+    private function isPoolClientIdUnique($id)
+    {
+        return !isset($this->pool) || !$this->pool->clientExists($id);
+    }
+
+    /**
      * Generate random client ID
      * @return string
      */
-    private function generatePoolClientId()
+    private static function generatePoolClientId()
     {
         $now = ceil(microtime(true) * 10000);
         if (class_exists('Reaction', false)) {
             $rand = \Reaction::$app->security->generateRandomString(8);
         } else {
-            $rand = $this->randomStr();
+            $rand = static::randomStr();
         }
-        $prefix = isset($this->_clientIdPrefix) ? $this->_clientIdPrefix : '';
-        return $prefix . $now . $rand;
+        return static::getClientIdPrefix() . $now . $rand;
     }
 }
