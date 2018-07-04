@@ -8,7 +8,8 @@ use Evenement\EventEmitterInterface;
  * Interface ClientInterface
  * @package Reaction\ClientsPool
  *
- * @property integer $createdAt
+ * @property integer       $createdAt
+ * @property PoolInterface $pool
  */
 interface PoolClientInterface extends EventEmitterInterface
 {
@@ -18,8 +19,9 @@ interface PoolClientInterface extends EventEmitterInterface
 
     const CLIENT_POOL_STATE_READY = 0;
     const CLIENT_POOL_STATE_BUSY = 1;
-    const CLIENT_POOL_STATE_NOT_READY = 2;
-    const CLIENT_POOL_STATE_CLOSING = 3;
+    const CLIENT_POOL_STATE_LOCKED = 2;
+    const CLIENT_POOL_STATE_NOT_READY = 3;
+    const CLIENT_POOL_STATE_CLOSING = 4;
 
     /**
      * Get client unique ID
@@ -43,4 +45,14 @@ interface PoolClientInterface extends EventEmitterInterface
      * Close client
      */
     public function clientClose();
+
+    /**
+     * Lock client
+     */
+    public function clientLock();
+
+    /**
+     * Unlock client
+     */
+    public function clientUnlock();
 }

@@ -8,14 +8,25 @@ namespace Reaction\ClientsPool;
  */
 trait PoolClientTrait
 {
+    /**
+     * @var int Created time
+     */
     public $createdAt = 0;
+    /**
+     * @var PoolInterface Pool which this client belongs to
+     */
+    public $pool;
 
-    /** @var string|null */
+    /** @var string|null Client ID in pool */
     protected $_poolClientId;
-    /** @var int */
+    /** @var int Current state */
     protected $_poolClientState = PoolClientInterface::CLIENT_POOL_STATE_READY;
-    /** @var int */
+    /** @var int Previous state */
+    protected $_poolClientStatePrev;
+    /** @var int Queue counter */
     protected $_poolClientQueueCounter = 0;
+    /** @var string Client ID prefix */
+    protected $_clientIdPrefix = '';
 
     /**
      * Get client unique ID
@@ -24,13 +35,10 @@ trait PoolClientTrait
     public function getClientId()
     {
         if (!isset($this->_poolClientId)) {
-            $now = ceil(microtime(true) * 10000);
-            if (class_exists('Reaction', false)) {
-                $rand = \Reaction::$app->security->generateRandomString(8);
-            } else {
-                $rand = $this->randomStr();
+            while (!isset($id) || $this->pool->clientExists($id)) {
+                $id = $this->generatePoolClientId();
             }
-            $this->_poolClientId = $now . $rand;
+            $this->_poolClientId = $id;
         }
         return $this->_poolClientId;
     }
@@ -62,13 +70,43 @@ trait PoolClientTrait
     }
 
     /**
+     * Lock client
+     */
+    public function clientLock()
+    {
+        $this->changeState(PoolClientInterface::CLIENT_POOL_STATE_LOCKED);
+    }
+
+    /**
+     * Unlock client
+     */
+    public function clientUnlock()
+    {
+        $this->restoreState();
+    }
+
+    /**
      * Change client state helper
      * @param int $state
      */
     protected function changeState($state)
     {
+        $currState = $this->_poolClientState;
+        //Save previous state
+        if (isset($currState) && $currState !== PoolClientInterface::CLIENT_POOL_STATE_LOCKED) {
+            $this->_poolClientStatePrev = $currState;
+        }
         $this->_poolClientState = $state;
         $this->emit(PoolClientInterface::CLIENT_POOL_EVENT_CHANGE_STATE, [$state]);
+    }
+
+    /**
+     * @param int $defaultState
+     */
+    protected function restoreState($defaultState = PoolClientInterface::CLIENT_POOL_STATE_READY)
+    {
+        $prevState = isset($this->_poolClientStatePrev) ? $this->_poolClientStatePrev : $defaultState;
+        $this->changeState($prevState);
     }
 
     /**
@@ -124,5 +162,21 @@ trait PoolClientTrait
             $pieces[] = $keySpace[random_int(0, $max)];
         }
         return implode('', $pieces);
+    }
+
+    /**
+     * Generate random client ID
+     * @return string
+     */
+    private function generatePoolClientId()
+    {
+        $now = ceil(microtime(true) * 10000);
+        if (class_exists('Reaction', false)) {
+            $rand = \Reaction::$app->security->generateRandomString(8);
+        } else {
+            $rand = $this->randomStr();
+        }
+        $prefix = isset($this->_clientIdPrefix) ? $this->_clientIdPrefix : '';
+        return $prefix . $now . $rand;
     }
 }
