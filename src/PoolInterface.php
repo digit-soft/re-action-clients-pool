@@ -42,6 +42,13 @@ interface PoolInterface extends EventEmitterInterface
     public function isReachedMaxClients();
 
     /**
+     * Check that client with given ID exists in pool
+     * @param string $id
+     * @return bool
+     */
+    public function clientExists($id);
+
+    /**
      * Close all clients/connections
      */
     public function closeAll();
