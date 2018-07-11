@@ -5,7 +5,7 @@ namespace Reaction\ClientsPool;
 use Evenement\EventEmitterInterface;
 
 /**
- * Interface PoolInterface
+ * Interface for `Pool` class or it's subclasses.
  * @package Reaction\ClientsPool
  */
 interface PoolInterface extends EventEmitterInterface

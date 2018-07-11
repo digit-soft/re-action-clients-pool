@@ -5,7 +5,8 @@ namespace Reaction\ClientsPool;
 use Evenement\EventEmitterInterface;
 
 /**
- * Interface ClientInterface
+ * Interface ClientInterface.
+ * You must implement this interface in your class, that will be managed by pool.
  * @package Reaction\ClientsPool
  *
  * @property integer       $createdAt

@@ -8,7 +8,8 @@ use Reaction\Base\Component;
 use Reaction\Helpers\ArrayHelper;
 
 /**
- * Class Pool
+ * Class Pool.
+ * Generic `PoolInterface` implementation
  * @package Reaction\ClientsPool
  */
 class Pool extends Component implements PoolInterface
@@ -47,12 +48,12 @@ class Pool extends Component implements PoolInterface
      */
     protected $_clientsQueueCounters = [];
     /**
-     * @var TimerInterface
+     * @var TimerInterface Cleanup timer instance
      */
     protected $_clientsCleanupTimer;
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function init()
     {
@@ -61,8 +62,7 @@ class Pool extends Component implements PoolInterface
     }
 
     /**
-     * Get client from pool
-     * @return PoolClientInterface
+     * {@inheritdoc}
      */
     public function getClient()
     {
@@ -77,8 +77,7 @@ class Pool extends Component implements PoolInterface
     }
 
     /**
-     * Get client with empty queue
-     * @return PoolClientInterface|null
+     * {@inheritdoc}
      */
     public function getClientIdle()
     {
@@ -95,8 +94,7 @@ class Pool extends Component implements PoolInterface
     }
 
     /**
-     * Get least busy client
-     * @return PoolClientInterface|null
+     * {@inheritdoc}
      */
     public function getClientLeastBusy()
     {
@@ -118,9 +116,7 @@ class Pool extends Component implements PoolInterface
     }
 
     /**
-     * Create client
-     * @param bool  $addToPool
-     * @return PoolClientInterface
+     * {@inheritdoc}
      */
     public function createClient($addToPool = true)
     {
@@ -148,8 +144,7 @@ class Pool extends Component implements PoolInterface
     }
 
     /**
-     * Check that clients max count reached
-     * @return bool
+     * {@inheritdoc}
      */
     public function isReachedMaxClients()
     {
@@ -157,9 +152,7 @@ class Pool extends Component implements PoolInterface
     }
 
     /**
-     * Check that client with given ID exists in pool
-     * @param string $id
-     * @return bool
+     * {@inheritdoc}
      */
     public function clientExists($id)
     {
@@ -167,7 +160,7 @@ class Pool extends Component implements PoolInterface
     }
 
     /**
-     * Close all clients/connections
+     * {@inheritdoc}
      */
     public function closeAll()
     {

@@ -3,7 +3,7 @@
 namespace Reaction\ClientsPool;
 
 /**
- * Trait PoolClientTrait
+ * Trait to use with your class, that implements `PoolClientInterface` to provide needed methods and properties.
  * @package Reaction\ClientsPool
  */
 trait PoolClientTrait
