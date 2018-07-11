@@ -8,8 +8,7 @@ use Reaction\Base\Component;
 use Reaction\Helpers\ArrayHelper;
 
 /**
- * Class Pool.
- * Generic `PoolInterface` implementation
+ * Generic `PoolInterface` implementation.
  * @package Reaction\ClientsPool
  */
 class Pool extends Component implements PoolInterface

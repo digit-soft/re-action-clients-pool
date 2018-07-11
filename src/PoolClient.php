@@ -5,7 +5,6 @@ namespace Reaction\ClientsPool;
 use Reaction\Base\Component;
 
 /**
- * Class PoolClient.
  * Just an example class, use your own with `PoolClientTrait` instead.
  * @package Reaction\ClientsPool
  */
